@@ -1,6 +1,7 @@
 package lab7;
 
 import org.zeromq.*;
+import sun.java2d.pipe.SpanClipRenderer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ public class CacheStorage {
     public static final int TIMEOUT = 5000;
     public static final String HEARTBEAT = "Heartbleed";
     public static final String SPACE_DELIMITER = " ";
+    private static final int CACHE = 0;
 
     private static int leftBorder, rightBorder;
     private ZMQ.Socket dealer;
@@ -49,6 +51,14 @@ public class CacheStorage {
                 m.addLast(HEARTBEAT + SPACE_DELIMITER + leftBorder + SPACE_DELIMITER + rightBorder);
                 m.send(dealer);
             }
+
+            if (poller.pollin(CACHE)) {
+                ZMsg msg = ZMsg.recvMsg(dealer);
+                System.out.println("Get message: " + msg.toString());
+                ZFrame content = msg.getLast();
+                String[] contentArr = content.toString().split(SPACE_DELIMITER);
+
+
         }
     }
 }
