@@ -3,6 +3,7 @@ package lab7;
 import org.zeromq.*;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Proxy {
     private ZMQ.Poller poller;
@@ -28,7 +29,7 @@ public class Proxy {
     }
 
     private void waitAndDoRequests() {
-        Map<ZFrame, CacheCommutator> commutatorMap = new HashMap<>();
+        Map<ZFrame, CacheIntersections> intersections = new HashMap<>();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);
             getClientRequest();
