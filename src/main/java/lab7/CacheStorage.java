@@ -16,7 +16,7 @@ public class CacheStorage {
     public static final String PUT = "PUT";
 
     private static int leftBorder, rightBorder;
-    private ZMQ.Socket dealer;
+    private ZMQ.Socket cacheSocket;
     private ZMQ.Poller poller;
     private Map<Integer, String> cache;
 
@@ -36,12 +36,12 @@ public class CacheStorage {
         }
 
         ZContext context = new ZContext();
-        dealer = context.createSocket(SocketType.DEALER);
-        dealer.setHWM(0);
-        dealer.connect(DEALER_SOCKET);
+        cacheSocket = context.createSocket(SocketType.DEALER);
+        cacheSocket.setHWM(0);
+        cacheSocket.connect(DEALER_SOCKET);
 
         poller = context.createPoller(1);
-        poller.register(dealer, ZMQ.Poller.POLLIN);
+        poller.register(cacheSocket, ZMQ.Poller.POLLIN);
     }
 
     private void waitAndDoRequests() {
@@ -51,7 +51,7 @@ public class CacheStorage {
             heartbeat(startTime);
 
             if (poller.pollin(CACHE)) {
-                ZMsg msg = ZMsg.recvMsg(dealer);
+                ZMsg msg = ZMsg.recvMsg(cacheSocket);
                 System.out.println("Get message: " + msg.toString());
                 ZFrame info = msg.getLast();
                 String[] infoToArray = info.toString().split(SPACE_DELIMITER);
@@ -61,14 +61,14 @@ public class CacheStorage {
                     String value = cache.get(index);
                     msg.pollLast();
                     msg.addLast(value);
-                    msg.send(dealer);
+                    msg.send(cacheSocket);
                 }
 
                 if (infoToArray[0].equals(PUT)) {
                     int index = Integer.parseInt(infoToArray[1]);
                     String newValue = infoToArray[2];
                     cache.put(index, newValue);
-                    msg.send(dealer);
+                    msg.send(cacheSocket);
                 }
             }
         }
@@ -78,7 +78,7 @@ public class CacheStorage {
         if (System.currentTimeMillis() - startTime > TIMEOUT) {
             ZMsg m = new ZMsg();
             m.addLast(HEARTBEAT + SPACE_DELIMITER + leftBorder + SPACE_DELIMITER + rightBorder);
-            m.send(dealer);
+            m.send(cacheSocket);
         }
     }
 }

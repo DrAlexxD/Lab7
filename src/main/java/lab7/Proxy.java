@@ -12,8 +12,8 @@ public class Proxy {
 
     private ZMQ.Poller poller;
     private ZMQ.Socket client;
-    private ZMQ.Socket cache;
-    Map<ZFrame, CacheIntersections> intersections;
+    private ZMQ.Socket cacheSocket;
+    Map<ZFrame, CacheIntersections> caches;
 
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
@@ -23,20 +23,20 @@ public class Proxy {
 
     private void proxyInitialization() {
         ZContext context = new ZContext();
-        cache = context.createSocket(SocketType.ROUTER);
+        cacheSocket = context.createSocket(SocketType.ROUTER);
         client = context.createSocket(SocketType.ROUTER);
-        cache.setHWM(0);
+        cacheSocket.setHWM(0);
         client.setHWM(0);
-        cache.bind(CacheStorage.DEALER_SOCKET);
+        cacheSocket.bind(CacheStorage.DEALER_SOCKET);
         client.bind(Client.CLIENT_SOCKET);
 
         poller = context.createPoller(2);
         poller.register(client, ZMQ.Poller.POLLIN);
-        poller.register(cache, ZMQ.Poller.POLLIN);
+        poller.register(cacheSocket, ZMQ.Poller.POLLIN);
     }
 
     private void waitAndDoRequests() {
-        intersections = new HashMap<>();
+        caches = new HashMap<>();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);
             if (getClientRequest() == -1)
@@ -54,31 +54,31 @@ public class Proxy {
             }
             System.out.println("Get message: " + msg);
 
-            if (intersections.isEmpty()) {
+            if (caches.isEmpty()) {
                 ZMsg errMsg = new ZMsg();
                 errMsg.add(msg.getFirst());
                 errMsg.add(EMPTY_STRING);
-                errMsg.add("no cache");
+                errMsg.add("no cacheSocket");
                 errMsg.send(client);
             } else {
                 String[] data = msg.getLast().toString().split(CacheStorage.SPACE_DELIMITER);
                 if (data[0].equals(CacheStorage.GET)) {
-                    for (Map.Entry<ZFrame, CacheIntersections> map : intersections.entrySet()) {
+                    for (Map.Entry<ZFrame, CacheIntersections> map : caches.entrySet()) {
                         if (map.getValue().isIntersect(data[1])) {
                             ZFrame cacheFrame = map.getKey().duplicate();
                             msg.addFirst(cacheFrame);
-                            msg.send(cache);
+                            msg.send(cacheSocket);
                         }
                     }
                 } else {
                     if (data[0].equals(CacheStorage.PUT)) {
-                        for (Map.Entry<ZFrame, CacheIntersections> map : intersections.entrySet()) {
+                        for (Map.Entry<ZFrame, CacheIntersections> map : caches.entrySet()) {
                             if (map.getValue().isIntersect(data[1])) {
                                 ZMsg msgCopy = msg;
                                 ZFrame cacheFrame = map.getKey();
                                 msgCopy.addFirst(cacheFrame);
                                 System.out.println("Put message: " + msgCopy);
-                                msgCopy.send(cache);
+                                msgCopy.send(cacheSocket);
                             }
                         }
                     } else {
@@ -96,13 +96,13 @@ public class Proxy {
 
     private int getCacheStorageRequest() {
         if (poller.pollin(CACHE_MSG)) {
-            ZMsg msg = ZMsg.recvMsg(cache);
+            ZMsg msg = ZMsg.recvMsg(cacheSocket);
             if (msg == null) {
                 return -1;
             }
 
             if (msg.getLast().toString().contains(CacheStorage.HEARTBEAT)) {
-                if (!intersections.containsKey(msg.getFirst())) {
+                if (!caches.containsKey(msg.getFirst())) {
                     ZFrame data = msg.getLast();
                     String[] dataToArray = data.toString().split(CacheStorage.SPACE_DELIMITER);
                     CacheIntersections cacheIntersections = new CacheIntersections(
@@ -110,11 +110,11 @@ public class Proxy {
                             dataToArray[2],
                             System.currentTimeMillis()
                     );
-                    intersections.put(msg.getFirst().duplicate(), cacheIntersections);
-                    System.out.println("Created cache: " + msg.getFirst() + " " + cacheIntersections.getLeftBorder() +
+                    caches.put(msg.getFirst().duplicate(), cacheIntersections);
+                    System.out.println("Created cacheSocket: " + msg.getFirst() + " " + cacheIntersections.getLeftBorder() +
                             " " + cacheIntersections.getRightBorder());
                 }else{
-                    intersections.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
+                    caches.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
                 }
             } else {
                 System.out.println("Didnt get heartbeat: " + msg);
