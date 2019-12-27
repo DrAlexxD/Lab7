@@ -1,7 +1,6 @@
 package lab7;
 
 import org.zeromq.*;
-import sun.java2d.pipe.SpanClipRenderer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +12,13 @@ public class CacheStorage {
     public static final String HEARTBEAT = "Heartbleed";
     public static final String SPACE_DELIMITER = " ";
     private static final int CACHE = 0;
+    public static final String GET = "GET";
+    public static final String PUT = "PUT";
 
     private static int leftBorder, rightBorder;
     private ZMQ.Socket dealer;
     private ZMQ.Poller poller;
+    private Map<Integer, String> cache;
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
@@ -28,7 +30,7 @@ public class CacheStorage {
     }
 
     private void cacheInitialization() {
-        Map<Integer, String> cache = new HashMap<>();
+        cache = new HashMap<>();
         for (int i = leftBorder; i <= rightBorder; i++) {
             cache.put(i, Integer.toString(i));
         }
@@ -55,10 +57,24 @@ public class CacheStorage {
             if (poller.pollin(CACHE)) {
                 ZMsg msg = ZMsg.recvMsg(dealer);
                 System.out.println("Get message: " + msg.toString());
-                ZFrame content = msg.getLast();
-                String[] contentArr = content.toString().split(SPACE_DELIMITER);
-            }
+                ZFrame info = msg.getLast();
+                String[] infoToArray = info.toString().split(SPACE_DELIMITER);
 
+                if (infoToArray[0].equals(GET)) {
+                    int index = Integer.parseInt(infoToArray[1]);
+                    String value = cache.get(index);
+                    msg.pollLast();
+                    msg.addLast(value);
+                    msg.send(dealer);
+                }
+
+                if (infoToArray[0].equals(PUT)) {
+                    int index = Integer.parseInt(infoToArray[1]);
+                    String newValue = infoToArray[2];
+                    cache.put(index, newValue);
+                    msg.send(dealer);
+                }
+            }
         }
     }
 }
