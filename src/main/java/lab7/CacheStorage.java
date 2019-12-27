@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class CacheStorage {
     public static final String DEALER_SOCKET = "tcp://localhost:2050";
     public static final int TIMEOUT = 5000;
-    public static final String HEARTBEAT = "Heartbleed";
+    public static final String HEARTBEAT = "Heartbeat";
     public static final String SPACE_DELIMITER = " ";
     private static final int CACHE = 0;
     public static final String GET = "GET";

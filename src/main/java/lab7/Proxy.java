@@ -101,7 +101,25 @@ public class Proxy {
                 return -1;
             }
 
-
+            if (msg.getLast().toString().contains(CacheStorage.HEARTBEAT)) {
+                if (!commutatorMap.containsKey(msg.getFirst())) {
+                    ZFrame data = msg.getLast();
+                    String[] fields = data.toString().split(DELIMITER);
+                    CacheCommutator tmp = new CacheCommutator(
+                            fields[1],
+                            fields[2],
+                            System.currentTimeMillis()
+                    );
+                    commutatorMap.put(msg.getFirst().duplicate(), tmp);
+                    System.out.println("New cache -> " + msg.getFirst() + " " + tmp.getLeftBound() + " " + tmp.getRightBound());
+                }else{
+                    commutatorMap.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
+                }
+            } else {
+                System.out.println("NO HEARTHBEAT ->" + msg);
+                msg.pop();
+                msg.send(frontend);
+            }
         }
 
         return 0;
