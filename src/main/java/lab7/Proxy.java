@@ -94,6 +94,12 @@ public class Proxy {
     }
 
     private void getCacheStorageRequest() {
+        if (poller.pollin(CLIENT_MSG)) {
+            ZMsg msg = ZMsg.recvMsg(client);
+            if (msg == null) {
+                return -1;
+            }
+            System.out.println("Get message: " + msg);
 
     }
 }
