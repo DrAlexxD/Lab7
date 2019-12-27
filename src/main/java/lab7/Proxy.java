@@ -52,7 +52,6 @@ public class Proxy {
             if (msg == null) {
                 return -1;
             }
-            System.out.println("Get message: " + msg);
 
             if (caches.isEmpty()) {
                 ZMsg errMsg = new ZMsg();
@@ -67,15 +66,17 @@ public class Proxy {
                         if (map.getValue().isIntersect(data[1])) {
                             ZFrame cacheFrame = map.getKey().duplicate();
                             msg.addFirst(cacheFrame);
+                            System.out.println("Get message: " + msg);
                             msg.send(cacheSocket);
+                            break;
                         }
                     }
                 } else {
                     if (data[0].equals(CacheStorage.PUT)) {
                         for (Map.Entry<ZFrame, Cache> map : caches.entrySet()) {
                             if (map.getValue().isIntersect(data[1])) {
-                                ZMsg msgCopy = msg;
-                                ZFrame cacheFrame = map.getKey();
+                                ZMsg msgCopy = msg.duplicate();
+                                ZFrame cacheFrame = map.getKey().duplicate();
                                 msgCopy.addFirst(cacheFrame);
                                 System.out.println("Put message: " + msgCopy);
                                 msgCopy.send(cacheSocket);
@@ -111,14 +112,14 @@ public class Proxy {
                             System.currentTimeMillis()
                     );
                     caches.put(msg.getFirst().duplicate(), cache);
-                    System.out.println("Created cacheSocket: " + msg.getFirst() + " " + cache.getLeftBorder() +
+                    System.out.println("Created cache: " + msg.getFirst() + " " + cache.getLeftBorder() +
                             " " + cache.getRightBorder());
                 } else {
                     caches.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
                 }
             } else {
-                System.out.println("Didnt get heartbeat: " + msg);
                 msg.pop();
+                System.out.println("Answer: " + msg);
                 msg.send(client);
             }
         }

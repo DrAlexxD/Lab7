@@ -48,8 +48,7 @@ public class Client {
         if (req == null) {
             return -1;
         }
-        String s = req.popString();
-        System.out.println(req.toString());
+        System.out.println(req.getLast().toString());
         req.destroy();
         return 0;
     }
