@@ -118,7 +118,7 @@ public class Proxy {
                 }
             } else {
                 System.out.println("Didnt get heartbeat: " + msg);
-                //msg.pop();
+                msg.pop();
                 msg.send(client);
             }
         }
