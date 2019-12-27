@@ -48,11 +48,7 @@ public class CacheStorage {
         long startTime = System.currentTimeMillis();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);
-            if (System.currentTimeMillis() - startTime > TIMEOUT) {
-                ZMsg m = new ZMsg();
-                m.addLast(HEARTBEAT + SPACE_DELIMITER + leftBorder + SPACE_DELIMITER + rightBorder);
-                m.send(dealer);
-            }
+            heartbeat(startTime);
 
             if (poller.pollin(CACHE)) {
                 ZMsg msg = ZMsg.recvMsg(dealer);
@@ -75,6 +71,14 @@ public class CacheStorage {
                     msg.send(dealer);
                 }
             }
+        }
+    }
+
+    private void heartbeat(long startTime) {
+        if (System.currentTimeMillis() - startTime > TIMEOUT) {
+            ZMsg m = new ZMsg();
+            m.addLast(HEARTBEAT + SPACE_DELIMITER + leftBorder + SPACE_DELIMITER + rightBorder);
+            m.send(dealer);
         }
     }
 }
