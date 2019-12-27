@@ -2,6 +2,7 @@ package lab7;
 
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
+import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 
 public class Proxy {
@@ -9,6 +10,7 @@ public class Proxy {
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
         proxy.proxyInitialization();
+        proxy.waitAndDoRequests();
     }
 
     private void proxyInitialization() {
@@ -23,5 +25,12 @@ public class Proxy {
         ZMQ.Poller poller = context.createPoller(2);
         poller.register(toClient, ZMQ.Poller.POLLIN);
         poller.register(toCache, ZMQ.Poller.POLLIN);
+    }
+
+    private void waitAndDoRequests() {
+        Map<ZFrame, CacheCommutator> commutatorMap = new HashMap<>();
+        while (!Thread.currentThread().isInterrupted()) {
+
+        }
     }
 }
