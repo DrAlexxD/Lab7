@@ -1,17 +1,56 @@
 package lab7;
 
-import org.zeromq.*;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMsg;
+
+import java.util.Scanner;
 
 public class Client {
-
     public static final String CLIENT_SOCKET = "tcp://localhost:2052";
     private static final String CLIENT_ALIVE = "Client is online";
 
-    public static void main(String[] args){
+    private ZMQ.Socket client;
+    private Scanner in = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        Client client = new Client();
+        client.clientInitialization();
+        client.workWithProxy();
+    }
+
+    private void clientInitialization() {
         ZContext context = new ZContext();
-        ZMQ.Socket client = context.createSocket(SocketType.REQ);
+        client = context.createSocket(SocketType.REQ);
         client.setHWM(0);
         client.connect(CLIENT_SOCKET);
         System.out.println(CLIENT_ALIVE);
+    }
+
+    private void workWithProxy() {
+        while (true) {
+            getRequestAndSendToProxy();
+            if (getAnswerFromProxy() == -1)
+                break;
+        }
+    }
+
+    private void getRequestAndSendToProxy() {
+        String value = in.nextLine();
+        ZMsg m = new ZMsg();
+        m.addString(value);
+        m.send(client);
+    }
+
+    private int getAnswerFromProxy() {
+        ZMsg req = ZMsg.recvMsg(client);
+        if (req == null) {
+            return -1;
+        }
+        String s = req.popString();
+        System.out.println(req.toString());
+        req.destroy();
+        return 0;
     }
 }

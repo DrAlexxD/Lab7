@@ -7,13 +7,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class CacheStorage {
-    private static int leftBorder, rightBorder;
-    private ZMQ.Socket dealer;
-    private ZMQ.Poller poller;
     public static final String DEALER_SOCKET = "tcp://localhost:2050";
     public static final int TIMEOUT = 5000;
     public static final String HEARTBEAT = "Heartbleed";
     public static final String SPACE_DELIMITER = " ";
+
+    private static int leftBorder, rightBorder;
+    private ZMQ.Socket dealer;
+    private ZMQ.Poller poller;
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
