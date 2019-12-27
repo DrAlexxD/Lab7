@@ -41,7 +41,8 @@ public class Proxy {
             poller.poll(1);
             if (getClientRequest() == -1)
                 break;
-            getCacheStorageRequest();
+            if (getCacheStorageRequest() == -1)
+                break;
         }
     }
 
@@ -93,13 +94,14 @@ public class Proxy {
         return 0;
     }
 
-    private void getCacheStorageRequest() {
-        if (poller.pollin(CLIENT_MSG)) {
-            ZMsg msg = ZMsg.recvMsg(client);
+    private int getCacheStorageRequest() {
+        if (poller.pollin(CACHE_MSG)) {
+            ZMsg msg = ZMsg.recvMsg(cache);
             if (msg == null) {
                 return -1;
             }
-            System.out.println("Get message: " + msg);
+        }
 
+        return 0;
     }
 }
