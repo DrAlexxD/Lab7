@@ -11,6 +11,8 @@ import java.util.Scanner;
 
 public class CacheStorage {
     private static int leftBorder, rightBorder;
+    private ZMQ.Socket dealer;
+    private ZMQ.Poller poller;
     public static final String DEALER_SOCKET = "tcp://localhost:2050";
     public static final int TIMEOUT = 5000;
     public static final String HEARTBEAT = "Heartbleed";
@@ -20,6 +22,9 @@ public class CacheStorage {
         Scanner in = new Scanner(System.in);
         leftBorder = in.nextInt();
         rightBorder = in.nextInt();
+        CacheStorage cacheStorage = new CacheStorage();
+        cacheStorage.cacheInitialization();
+        cacheStorage.waitAndDoRequests();
     }
 
     private void cacheInitialization() {
@@ -29,11 +34,15 @@ public class CacheStorage {
         }
 
         ZContext context = new ZContext();
-        ZMQ.Socket dealer = context.createSocket(SocketType.DEALER);
+        dealer = context.createSocket(SocketType.DEALER);
         dealer.setHWM(0);
         dealer.connect(DEALER_SOCKET);
-        ZMQ.Poller poller = context.createPoller(1);
+
+        poller = context.createPoller(1);
         poller.register(dealer, ZMQ.Poller.POLLIN);
+    }
+
+    private void waitAndDoRequests() {
         long startTime = System.currentTimeMillis();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);

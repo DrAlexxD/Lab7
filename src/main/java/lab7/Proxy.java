@@ -12,10 +12,12 @@ public class Proxy {
         ZMQ.Socket toClient = context.createSocket(SocketType.ROUTER);
         toCache.setHWM(0);
         toClient.setHWM(0);
-        toCache.bind(BACKEND_SOCKET);
-        toClient.bind(FRONTEND_SOCKET);
+        toCache.bind(CacheStorage.DEALER_SOCKET);
+        toClient.bind(Client.CLIENT_SOCKET);
+
         ZMQ.Poller poller = context.createPoller(2);
-        poller.register(frontend, ZMQ.Poller.POLLIN);
-        poller.register(backend, ZMQ.Poller.POLLIN);
+        poller.register(toClient, ZMQ.Poller.POLLIN);
+        poller.register(toCache, ZMQ.Poller.POLLIN);
+
     }
 }
