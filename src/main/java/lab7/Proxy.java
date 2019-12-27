@@ -13,7 +13,7 @@ public class Proxy {
     private ZMQ.Poller poller;
     private ZMQ.Socket client;
     private ZMQ.Socket cacheSocket;
-    Map<ZFrame, CacheIntersections> caches;
+    Map<ZFrame, Cache> caches;
 
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
@@ -63,7 +63,7 @@ public class Proxy {
             } else {
                 String[] data = msg.getLast().toString().split(CacheStorage.SPACE_DELIMITER);
                 if (data[0].equals(CacheStorage.GET)) {
-                    for (Map.Entry<ZFrame, CacheIntersections> map : caches.entrySet()) {
+                    for (Map.Entry<ZFrame, Cache> map : caches.entrySet()) {
                         if (map.getValue().isIntersect(data[1])) {
                             ZFrame cacheFrame = map.getKey().duplicate();
                             msg.addFirst(cacheFrame);
@@ -72,7 +72,7 @@ public class Proxy {
                     }
                 } else {
                     if (data[0].equals(CacheStorage.PUT)) {
-                        for (Map.Entry<ZFrame, CacheIntersections> map : caches.entrySet()) {
+                        for (Map.Entry<ZFrame, Cache> map : caches.entrySet()) {
                             if (map.getValue().isIntersect(data[1])) {
                                 ZMsg msgCopy = msg;
                                 ZFrame cacheFrame = map.getKey();
@@ -105,14 +105,14 @@ public class Proxy {
                 if (!caches.containsKey(msg.getFirst())) {
                     ZFrame data = msg.getLast();
                     String[] dataToArray = data.toString().split(CacheStorage.SPACE_DELIMITER);
-                    CacheIntersections cacheIntersections = new CacheIntersections(
+                    Cache cache = new Cache(
                             dataToArray[1],
                             dataToArray[2],
                             System.currentTimeMillis()
                     );
-                    caches.put(msg.getFirst().duplicate(), cacheIntersections);
-                    System.out.println("Created cacheSocket: " + msg.getFirst() + " " + cacheIntersections.getLeftBorder() +
-                            " " + cacheIntersections.getRightBorder());
+                    caches.put(msg.getFirst().duplicate(), cache);
+                    System.out.println("Created cacheSocket: " + msg.getFirst() + " " + cache.getLeftBorder() +
+                            " " + cache.getRightBorder());
                 }else{
                     caches.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
                 }

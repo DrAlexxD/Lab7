@@ -1,10 +1,10 @@
 package lab7;
 
-public class CacheIntersections {
+public class Cache {
     private String leftBorder, rightBorder;
     private long time;
 
-    public CacheIntersections(String leftBorder, String rightBorder, long time) {
+    public Cache(String leftBorder, String rightBorder, long time) {
         this.leftBorder = leftBorder;
         this.rightBorder = rightBorder;
         this.time = time;
