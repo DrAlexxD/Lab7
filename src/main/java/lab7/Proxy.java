@@ -6,7 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Proxy {
+    public static final int CACHE_MSG = 1;
+    public static final int CLIENT_MSG = 0;
+
     private ZMQ.Poller poller;
+    private ZMQ.Socket toClient;
+    private ZMQ.Socket toCache;
 
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
@@ -32,13 +37,21 @@ public class Proxy {
         Map<ZFrame, CacheIntersections> intersections = new HashMap<>();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);
-            getClientRequest();
+            if (getClientRequest() == -1)
+                break;
             getCacheStorageRequest();
         }
     }
 
-    private void getClientRequest() {
+    private int getClientRequest() {
+        if (poller.pollin(CLIENT_MSG)) {
+            ZMsg msg = ZMsg.recvMsg(toClient);
+            if (msg == null) {
+                return -1;
+            }
 
+        }
+        return 0;
     }
 
     private void  getCacheStorageRequest() {
