@@ -102,23 +102,24 @@ public class Proxy {
             }
 
             if (msg.getLast().toString().contains(CacheStorage.HEARTBEAT)) {
-                if (!commutatorMap.containsKey(msg.getFirst())) {
+                if (!intersections.containsKey(msg.getFirst())) {
                     ZFrame data = msg.getLast();
-                    String[] fields = data.toString().split(DELIMITER);
-                    CacheCommutator tmp = new CacheCommutator(
-                            fields[1],
-                            fields[2],
+                    String[] dataToArray = data.toString().split(CacheStorage.SPACE_DELIMITER);
+                    CacheIntersections cacheIntersections = new CacheIntersections(
+                            dataToArray[1],
+                            dataToArray[2],
                             System.currentTimeMillis()
                     );
-                    commutatorMap.put(msg.getFirst().duplicate(), tmp);
-                    System.out.println("New cache -> " + msg.getFirst() + " " + tmp.getLeftBound() + " " + tmp.getRightBound());
+                    intersections.put(msg.getFirst().duplicate(), cacheIntersections);
+                    System.out.println("Created cache: " + msg.getFirst() + " " + cacheIntersections.getLeftBorder() +
+                            " " + cacheIntersections.getRightBorder());
                 }else{
-                    commutatorMap.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
+                    intersections.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
                 }
             } else {
-                System.out.println("NO HEARTHBEAT ->" + msg);
+                System.out.println("Didnt get heartbeat: " + msg);
                 msg.pop();
-                msg.send(frontend);
+                msg.send(client);
             }
         }
 

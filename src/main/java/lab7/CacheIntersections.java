@@ -20,9 +20,9 @@ public class CacheIntersections {
 
     public boolean isIntersect(String a) {
         int req = Integer.parseInt(a);
-        int leftBorder = Integer.parseInt(leftBorder);
-        int rightBorder = Integer.parseInt(rightBorder);
-        return leftBorder <= req && req <= rightBorder;
+        int leftBorderInt = Integer.parseInt(leftBorder);
+        int rightBorderInt = Integer.parseInt(rightBorder);
+        return leftBorderInt <= req && req <= rightBorderInt;
     }
 
     public long getTime() {
