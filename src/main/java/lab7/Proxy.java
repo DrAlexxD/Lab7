@@ -5,8 +5,8 @@ import org.zeromq.*;
 import java.util.HashMap;
 
 public class Proxy {
+    private ZMQ.Poller poller;
 
-    private p
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
         proxy.proxyInitialization();
@@ -31,6 +31,16 @@ public class Proxy {
         Map<ZFrame, CacheCommutator> commutatorMap = new HashMap<>();
         while (!Thread.currentThread().isInterrupted()) {
             poller.poll(1);
+            getClientRequest();
+            getCacheStorageRequest();
         }
+    }
+
+    private void getClientRequest() {
+
+    }
+
+    private void  getCacheStorageRequest() {
+
     }
 }
