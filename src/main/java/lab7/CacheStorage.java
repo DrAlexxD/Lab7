@@ -57,7 +57,7 @@ public class CacheStorage {
                 System.out.println("Get message: " + msg.toString());
                 ZFrame content = msg.getLast();
                 String[] contentArr = content.toString().split(SPACE_DELIMITER);
-
+            }
 
         }
     }
