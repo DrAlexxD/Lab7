@@ -30,7 +30,7 @@ public class Proxy {
         cache.bind(CacheStorage.DEALER_SOCKET);
         client.bind(Client.CLIENT_SOCKET);
 
-        ZMQ.Poller poller = context.createPoller(2);
+        poller = context.createPoller(2);
         poller.register(client, ZMQ.Poller.POLLIN);
         poller.register(cache, ZMQ.Poller.POLLIN);
     }
