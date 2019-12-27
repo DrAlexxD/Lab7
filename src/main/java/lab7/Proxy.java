@@ -58,7 +58,7 @@ public class Proxy {
                 ZMsg errMsg = new ZMsg();
                 errMsg.add(msg.getFirst());
                 errMsg.add(EMPTY_STRING);
-                errMsg.add("no cacheSocket");
+                errMsg.add("no caches");
                 errMsg.send(client);
             } else {
                 String[] data = msg.getLast().toString().split(CacheStorage.SPACE_DELIMITER);
@@ -113,12 +113,12 @@ public class Proxy {
                     caches.put(msg.getFirst().duplicate(), cache);
                     System.out.println("Created cacheSocket: " + msg.getFirst() + " " + cache.getLeftBorder() +
                             " " + cache.getRightBorder());
-                }else{
+                } else {
                     caches.get(msg.getFirst().duplicate()).setTime(System.currentTimeMillis());
                 }
             } else {
                 System.out.println("Didnt get heartbeat: " + msg);
-                msg.pop();
+                //msg.pop();
                 msg.send(client);
             }
         }

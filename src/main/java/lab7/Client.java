@@ -37,9 +37,9 @@ public class Client {
     }
 
     private void getRequestAndSendToProxy() {
-        String value = in.nextLine();
+        String text = in.nextLine();
         ZMsg m = new ZMsg();
-        m.addString(value);
+        m.addString(text);
         m.send(client);
     }
 
