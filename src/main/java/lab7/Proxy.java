@@ -2,8 +2,11 @@ package lab7;
 
 import org.zeromq.*;
 
+import java.util.HashMap;
+
 public class Proxy {
 
+    private p
     public static void main(String[] args) {
         Proxy proxy = new Proxy();
         proxy.proxyInitialization();
@@ -27,7 +30,7 @@ public class Proxy {
     private void waitAndDoRequests() {
         Map<ZFrame, CacheCommutator> commutatorMap = new HashMap<>();
         while (!Thread.currentThread().isInterrupted()) {
-
+            poller.poll(1);
         }
     }
 }
